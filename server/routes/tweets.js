@@ -56,9 +56,9 @@ module.exports = function(DataHelpers) {
 
   //updata likes routes
   tweetsRoutes.post("/:id", function(req, res) {
-    const id = req.params.id;
+    const updateId = req.params.id;
     const username = req.body.username;
-    DataHelpers.updateTweet(id, username, (err, likes) => {
+    DataHelpers.updateTweet(updateId, username, (err, likes) => {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {
@@ -70,8 +70,8 @@ module.exports = function(DataHelpers) {
 
   //delete a post routes
   tweetsRoutes.post("/:id/delete", function(req, res) {
-    const id = req.params.id;
-    DataHelpers.deleteTweet(id, (err) => {
+    const deleteId = req.params.id;
+    DataHelpers.deleteTweet(deleteId, (err) => {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {

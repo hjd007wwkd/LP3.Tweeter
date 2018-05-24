@@ -33,11 +33,11 @@ module.exports = function makeDataHelpers(db) {
     },
 
     //update likes status
-    updateTweet: function(id, username, callback) {
+    updateTweet: function(updateId, username, callback) {
       //find the post element by id
-      id = {_id: ObjectId(id)};
+      updateId = {_id: ObjectId(updateId)};
 
-      db.collection("tweets").findOne(id, (err, data) => {
+      db.collection("tweets").findOne(updateId, (err, data) => {
         if(err) {
           return callback(err);
         }
@@ -54,7 +54,7 @@ module.exports = function makeDataHelpers(db) {
 
         //update database
         const newlikes={$set: {like: likes}};
-        db.collection("tweets").update(updateTweet, newlikes, (err) => {
+        db.collection("tweets").update(updateId, newlikes, (err) => {
           if(err) {
             return callback(err);
           }
@@ -64,9 +64,9 @@ module.exports = function makeDataHelpers(db) {
     },
 
     //delete a post by id
-    deleteTweet: function(id, callback){
-      id = {_id: ObjectId(deletePost)};
-      db.collection("tweets").deleteOne(id, (err) => {
+    deleteTweet: function(deleteId, callback){
+      deleteId = {_id: ObjectId(deleteId)};
+      db.collection("tweets").deleteOne(deleteId, (err) => {
         if(err) {
           return callback(err);
         }

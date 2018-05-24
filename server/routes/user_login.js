@@ -30,7 +30,7 @@ module.exports = function(db) {
               res.status(500).json({ error: err.message });
             } else {
               req.session.user_id = username;
-              req.session.name = data.name;
+              req.session.name = name;
               //code for successfully posted
               res.status(201).send(["7", username]);
             }
