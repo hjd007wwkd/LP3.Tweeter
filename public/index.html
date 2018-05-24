@@ -18,35 +18,70 @@
 
     <link rel="stylesheet" href="/styles/alert.css" type="text/css" />
 
+    <link rel="stylesheet" href="/styles/login.css" type="text/css" />
+
     <!-- External JS -->
     <script type="text/javascript" src="/vendor/jquery-2.2.3.min.js"></script>
 
     <!-- App JS -->
-    <script type="text/javascript" src="/scripts/app.js"></script>
+    <script type="module" src="/scripts/app.js"></script>
+
+    <script type="module" src="/scripts/alert.js"></script>
 
     <script type="text/javascript" src="/scripts/composer-char-counter.js"></script>
+
+    <script type="module" src="/scripts/login.js"></script>
   </head>
 
   <body>
 
     <!-- Top nav bar (fixed) -->
-    <nav id="nav-bar">
+    <nav id="nav_bar">
       <img class="logo" src="/images/bird.png">
       <span class="header">Tweeter</span>
-      <button class="compose">Compose</button>
+      <span class="compose">Compose</span>
+      <span class="register_btn">Register</span>
+      <span class="login_btn">Login</span>
+      <span class="logout_btn">Logout</span>
+      <span class="user_id"></span>
     </nav>
+
+    <!--alert -->
     <div class="alert"></div>
+
+    <div class="overlay">
+
+      <!-- user login page -->
+      <div class="login_page">
+        <form class="login_form" action="/login" method="get">
+          <input class="username" type="username" name="username" placeholder="username"/>
+          <input class="password" type="password" name="password" placeholder="password"/>
+          <input class="button" type="submit" value="Login">
+        </form>
+      </div>
+
+      <!-- user register page -->
+      <div class="register_page">
+        <form class="register_form" action="/register" method="POST">
+          <input class="username" type="username" name="username" placeholder="username"/>
+          <input class="password" type="password" name="password" placeholder="password"/>
+          <input class="name_tweet" type="name" name="name" placeholder="name"/>
+          <input class="button" type="submit" value="Register">
+        </form>
+      </div>
+    </div>
+
     <!-- Page-specific (main) content here -->
     <main class="container">
-      <section class="new-tweet">
+      <section class="new_tweet">
         <h2>Compose Tweet</h2>
-        <form action="/tweets" method="POST">
+        <form class="new_tweet_form" action="/tweets" method="POST">
           <textarea name="text" placeholder="What are you humming about?"></textarea>
           <input type="submit" value="Tweet">
           <span class="counter">140</span>
         </form>
       </section>
-      <section class="tweets-container">
+      <section class="tweets_container">
       </section>
     </main>
   </body>

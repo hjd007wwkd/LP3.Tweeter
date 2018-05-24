@@ -4,17 +4,20 @@
  * Reminder: Use (and do all your DOM work in) jQuery's document ready function
  */
 
-function time(mili){
-  const time = new Date().getTime();
-  const date = new Date(mili);
-  return date.toString();
-};
+//import custom alert function
+import alertMessage from "./alert.js";
+
+//convert milisecond to data
+function postDate(mili){
+  const myDate = new Date(mili);
+  return (myDate.getMonth()+1) + "/" + myDate.getDate() + '/' +  myDate.getFullYear() + " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds();
+}
 
 //take a array of data and render each
 function renderTweets(tweets) {
   tweets.forEach(function(tweet) {
     const $tweet = createTweetElement(tweet);
-    $('.tweets-container').prepend($tweet);
+    $('.tweets_container').prepend($tweet);
   });
 };
 
@@ -31,116 +34,150 @@ function createTweetElement (tweet) {
   const $comment = $("<p>").text(tweet.content.text);
 
   const $footer = $("<footer>");
-  const $time = $("<p>").addClass("time").text("10 days ago");
-  let $NumLikes;
-  if(tweet.like === "false") {
-    $NumLikes = $("<p>").addClass("NumLikes").text("");
+  const postTime = postDate(tweet.created_at);
+  const $time = $("<p>").addClass("time").text(postTime);
+  let $numLikes;
+  if(tweet.like.length === 0) {
+    $numLikes = $("<p>").addClass("num_likes").text("");
   } else {
-    $NumLikes = $("<p>").addClass("NumLikes").text("1 likes");
+    $numLikes = $("<p>").addClass("num_likes").text(tweet.like.length+" likes");
   }
 
-  const $like = $(`<img data-check=${tweet.like} src='/images/like.png'>`).addClass("like");
-  const $retweet = $("<img src='/images/Retweet.png'>").addClass("retweet");
-  const $flag = $("<img src='/images/flag.png'>").addClass("flag");
+  const $like = $(`<img src='/images/like.png'>`).addClass("like");
+  const $trash = $("<img src='/images/trash_can.png'>").addClass("trash");
 
   $header.append($img).append($name).append($userHandle);
   $section.append($comment);
-  $footer.append($time).append($like).append($retweet).append($flag).append($NumLikes);
+  $footer.append($time).append($trash).append($like).append($numLikes);
 
   $article.append($header).append($section).append($footer);
-
   return $article;
 };
 
-//over 140 chars, empty and success alert when I input the textarea
-function alertMessage(text, condition = null) {
-  if(text === "fail" && condition === 140) {
-    $(".alert").text("Your text cannot be over 140 characters!");
-    $(".alert").removeClass("success");
-    $(".alert").addClass("fail");
-  } else if (text === "fail") {
-    $(".alert").text("Type something!!");
-    $(".alert").removeClass("success");
-    $(".alert").addClass("fail");
-  } else {
-    $(".alert").text("You successfully update your message!!");
-    $(".alert").removeClass("fail");
-    $(".alert").addClass("success");
-  };
+//effect for showing page of compose
+let clickEffect = false;
+function showCompose() {
+  $(".compose").on("click", function() {
+    $(".new_tweet").slideToggle( "slow", function(){
+      if(clickEffect){
+        $(".compose").removeClass("clickEffect");
+      } else {
+        $(".compose").addClass("clickEffect");
+        $(".new_tweet textarea").focus();
+      }
+      clickEffect = !clickEffect;
+    });
+  });
+}
+
+
+//getting data from database
+function loadTweets () {
+  $.get( "/tweets", function(data){
+    renderTweets(data[0]);
+    if(data[1]){
+      $(".user_id").text(data[1]);
+      $(".compose, .logout_btn, .user_id").css("display", "inline")
+      $(".login_btn, .register_btn").css("display", "none");
+      $(".like, .trash").addClass("showIcons");
+    }
+  })
+  .fail(function(error) {
+    console.log(error);
+  });
 };
 
 $(document).ready(function(){
-  //getting data from database
-  function loadTweets () {
-    $.get( "/tweets", function(data){
-      renderTweets(data);
-    });
-  };
 
-  $( "form" ).on( "submit", function(event) {
+  //compose submit
+  $( ".new_tweet_form" ).on( "submit", function(event) {
     //prevent refreshing browser
     event.preventDefault();
 
     //alert error or success message
-    if($(".new-tweet textarea").val().length > 140){
-      alertMessage("fail", 140);
-    } else if ($(".new-tweet textarea").val().length === 0 || $(".new-tweet textarea").val() === null) {
-      alertMessage("fail");
+    if($(".new_tweet textarea").val().length > 140){
+      //when text over 140
+      alertMessage("0");
+    } else if ($(".new_tweet textarea").val().length === 0 || $(".new_tweet textarea").val() === null) {
+      //when text is empty
+      alertMessage("1");
     } else {
-      alertMessage("success");
-
-      var text = $(this).serialize();
+      const text = $(this).serialize()
 
       //posting data from input
-      $.post( "/tweets", text, function(){
-        $(".new-tweet textarea").val("");
-        $(".new-tweet .counter").text("140");
+      $.post( "/tweets", text)
+      .fail(function(error) {
+        console.log(error);
       })
       .done(function(data){
+        //change textarea empty, counter back to 140, and successful message
+        $(".new_tweet textarea").val("");
+        $(".new_tweet .counter").text("140");
+        $(".new_tweet").slideToggle("slow")
+        $(".compose").removeClass("clickEffect");
+        clickEffect = false;
+        alertMessage("2");
+
         //after posting data, get the data out to update site
         $.get( "/tweets", function(data){
-          $addTweet = createTweetElement(data[data.length-1]);
-          $('.tweets-container').prepend($addTweet);
+          const $addTweet = createTweetElement(data[0][data[0].length-1]);
+          $('.tweets_container').prepend($addTweet);
+          $(".like, .trash").addClass("showIcons");
         });
       });
     };
   });
 
-  $(".tweets-container").on("click", ".like", function(event) {
-    const id = $(event.target).parent().parent().data("id");
-    const check = $(event.target).attr("data-check");
-    $.ajax({
-      url: "/tweets/"+id,
-      type: "POST",
-      data: {id: id, check: check}
-    })
-    .done(function(){
-      if (check === "true") {
-        $(event.target).attr("data-check", "false");
-        $(event.target).parent().children(".NumLikes").text("");
-      } else {
-        $(event.target).attr("data-check", "true");
-        $(event.target).parent().children(".NumLikes").text("1 likes");
-      }
-    })
-    .fail(function(error) {
-      console.log(error);
-    })
+  //when click like button
+  $(".tweets_container").on("click", ".like", function(event) {
+    //get the id to find proper post
+    const id = $(event.target).parent().parent().attr("data-id");
+    const user_handle = $(event.target).parent().parent().children().children(".user_handle").text().slice(1);
+    const username = $("nav .user_id").text()
+    //check if the owner of the post, owner cannot like their own post
+    if(user_handle === username) {
+      alertMessage("9");
+    } else {
+      //update the like status
+      $.post("/tweets/"+id, {username: username})
+      .done(function(data){
+        //if empty like array, does not show anything to client
+        const numberLikes = $(event.target).parent().children(".num_likes")
+        if(data.length === 0) {
+          numberLikes.text("");
+        //if there is, show clients how many likes each have
+        } else {
+          numberLikes.text(data.length+" likes");
+        }
+      })
+      .fail(function(error) {
+        console.log(error);
+      })
+    }
   })
 
-  //if show false, compose hidden. If show true, compose show
-  let show = false;
-  $(".compose").on("click", function() {
-    $(".new-tweet").slideToggle( "slow", function(){
-      if(show){
-        $(".compose").removeClass("show");
-      } else {
-        $(".compose").addClass("show");
-        $(".new-tweet textarea").focus();
-      }
-      show = !show;
-    });
-  });
+  //delete post when you click trash icon
+  $(".tweets_container").on("click", ".trash", function(event) {
+    const id = $(event.target).parent().parent().attr("data-id");
+    const user_handle = $(event.target).parent().parent().children().children(".user_handle").text().slice(1);
+    const username = $("nav .user_id").text()
+    //check if user is ownere
+    if(user_handle !== username) {
+      alertMessage("10");
+    } else {
+      $.post("/tweets/"+id+"/delete")
+      .done(function(data){
+        //successfully deleted message
+        alertMessage("11");
+        //remove html element from html
+        $(event.target).parent().parent().remove();
+      })
+      .fail(function(error) {
+        console.log(error);
+      })
+    }
+  })
 
+  showCompose();
   loadTweets();
 })

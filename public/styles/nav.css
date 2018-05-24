@@ -1,4 +1,4 @@
-#nav-bar {
+#nav_bar {
   position: fixed;
   top: 0;
   height: 80px;
@@ -6,34 +6,35 @@
   background-color: #00a087;
   color: #e8fdff;
   padding: 0 2em;
-  z-index: 1;
+  z-index: 2;
 }
 
-#nav-bar .logo {
+#nav_bar .logo {
   float: left;
   width: 80px;
   height: 80px;
   margin-right: 10px;
 }
 
-#nav-bar .header {
+#nav_bar .header {
   float: left;
   font-size: 200%;
   line-height: 80px;
 }
 
-#nav-bar .compose {
+#nav_bar .login_btn, #nav_bar .register_btn, #nav_bar .logout_btn, #nav_bar .compose, #nav_bar .user_id, #nav_bar .menu{
   float: right;
-  border-radius: 5px;
-  border: 0.5px solid black;
-  width: 120px;
-  height: 60px;
-  font-size: 1.5em;
-  margin-top: 10px;
+  font-size: 200%;
+  line-height: 80px;
+  margin-right: 10px;
+  cursor: pointer;
 }
 
-.show {
-  background-color: #ebfcfe;
-  color: #4c9587;
+#nav_bar .compose, #nav_bar .logout_btn, #nav_bar .user_id {
+  display: none;
 }
 
+/*when the buttons active*/
+.clickEffect {
+  color: #84d7ef;
+}

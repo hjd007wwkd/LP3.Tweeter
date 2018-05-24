@@ -6,9 +6,14 @@ const PORT          = 8080;
 const express       = require("express");
 const bodyParser    = require("body-parser");
 const app           = express();
+const cookieSession = require('cookie-session');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(cookieSession({
+  name: 'session',
+  keys: ["secret"]
+}));
 
 const MongoClient = require("mongodb").MongoClient;
 const MONGODB_URI = "mongodb://localhost:27017/tweeter";
@@ -20,8 +25,11 @@ MongoClient.connect(MONGODB_URI, (err, db) => {
     throw err;
   };
   const DataHelpers = require("./lib/data-helpers.js")(db);
+  const userRoutes = require("./routes/user_login")(db)
   const tweetsRoutes = require("./routes/tweets")(DataHelpers);
+
   app.use("/tweets", tweetsRoutes);
+  app.use(userRoutes);
 
   app.listen(PORT, () => {
     console.log("Example app listening on port " + PORT);

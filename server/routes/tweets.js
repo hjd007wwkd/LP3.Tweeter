@@ -1,19 +1,24 @@
 "use strict";
 
-const userHelper    = require("../lib/util/user-helper")
+const userHelper    = require("../lib/util/user-helper");
 
 const express       = require('express');
 const tweetsRoutes  = express.Router();
+const cookieSession = require('cookie-session');
 
 module.exports = function(DataHelpers) {
 
   tweetsRoutes.get("/", function(req, res) {
+    const username = req.session.user_id;
+
+    //getting data from database
     DataHelpers.getTweets((err, tweets) => {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {
-        res.json(tweets);
-      }
+        //send the data back to ajax to use.
+        res.send([tweets, username]);
+      };
     });
   });
 
@@ -21,39 +26,60 @@ module.exports = function(DataHelpers) {
     if (!req.body.text) {
       res.status(400).json({ error: 'invalid request: no data in POST body'});
       return;
-    }
+    };
 
-    const user = req.body.user ? req.body.user : userHelper.generateRandomUser();
+    const username = req.session.user_id;
+    const text = req.body.text;
+    const name = req.session.name;
+
+    //if there is userlogin, use login id and name
+    const user = username ? userHelper.generateUser(name, username) : userHelper.generateRandomUser();
     const tweet = {
       user: user,
       content: {
-        text: req.body.text
+        text: text
       },
+      like: [],
       created_at: Date.now()
     };
 
+    //insert into database
     DataHelpers.saveTweet(tweet, (err) => {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {
+        //when it success, send back with status code
         res.status(201).send();
-      }
+      };
     });
   });
 
+  //updata likes routes
   tweetsRoutes.post("/:id", function(req, res) {
-    let like = req.body.check === "false" ? "true" : "false";
-    let update = req.params.id;
-    let data = {like: like};
-    DataHelpers.updateTweet(update, data, (err) => {
+    const id = req.params.id;
+    const username = req.body.username;
+    DataHelpers.updateTweet(id, username, (err, likes) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        //send back a likes list to count how many people in there
+        res.status(201).send(likes);
+      };
+    });
+  });
+
+  //delete a post routes
+  tweetsRoutes.post("/:id/delete", function(req, res) {
+    const id = req.params.id;
+    DataHelpers.deleteTweet(id, (err) => {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {
         res.status(201).send();
-      }
+      };
     });
-  })
+  });
 
   return tweetsRoutes;
 
-}
+};

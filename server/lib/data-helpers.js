@@ -11,41 +11,66 @@ module.exports = function makeDataHelpers(db) {
 
     // Saves a tweet to `db`
     saveTweet: function(newTweet, callback) {
-      simulateDelay(() => {
-        //save a data to database
-        db.collection("tweets").save(newTweet, (err, result) => {
-          if (err) {
-            return callback(err);
-          };
-          callback(null, true);
-        });
+      //save a data to database
+      db.collection("tweets").save(newTweet, (err, result) => {
+        if (err) {
+          return callback(err);
+        };
+        callback(null, true);
       });
     },
 
     // Get all tweets in `db`, sorted by newest first
     getTweets: function(callback) {
-      simulateDelay(() => {
-        //find the data from database and make that a array
-        db.collection("tweets").find().toArray((err, tweets) => {
-          if (err) {
-            return callback(err);
-          };
-          const sortNewestFirst = (a, b) => a.created_at - b.created_at;
-          callback(null, tweets.sort(sortNewestFirst));
-        });
+      //find the data from database and make that a array
+      db.collection("tweets").find().toArray((err, tweets) => {
+        if (err) {
+          return callback(err);
+        };
+        const sortNewestFirst = (a, b) => a.created_at - b.created_at;
+        callback(null, tweets.sort(sortNewestFirst));
       });
     },
 
-    updateTweet: function(updateTweet, data, callback) {
-      simulateDelay(() => {
-        updateTweet = {_id: ObjectId(updateTweet)};
-        data={$set: data}
-        db.collection("tweets").update(updateTweet, data, (err) => {
+    //update likes status
+    updateTweet: function(id, username, callback) {
+      //find the post element by id
+      id = {_id: ObjectId(id)};
+
+      db.collection("tweets").findOne(id, (err, data) => {
+        if(err) {
+          return callback(err);
+        }
+        //likes array that contains all the usernames
+        let likes = data.like;
+        if(likes.includes(username)){
+          //if it has the username, treat as a unlike
+          var index = likes.indexOf(username);
+          likes.splice(index, 1);
+        } else {
+          //if it does not have it, the add the username
+          likes.push(username);
+        }
+
+        //update database
+        const newlikes={$set: {like: likes}};
+        db.collection("tweets").update(updateTweet, newlikes, (err) => {
           if(err) {
             return callback(err);
           }
-          callback(null);
+          callback(null, likes);
         });
-      });
+      })
+    },
+
+    //delete a post by id
+    deleteTweet: function(id, callback){
+      id = {_id: ObjectId(deletePost)};
+      db.collection("tweets").deleteOne(id, (err) => {
+        if(err) {
+          return callback(err);
+        }
+        callback(null);
+      })
     }
 }};

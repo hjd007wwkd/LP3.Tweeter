@@ -1,4 +1,5 @@
-.new-tweet {
+/*compose box container*/
+.new_tweet {
   background: #eee;
   border-radius: 5px;
   margin: 0 2em;
@@ -8,19 +9,21 @@
   display: none;
 }
 
-.new-tweet h2 {
+/*title of compose box*/
+.new_tweet h2 {
   padding: 0;
   margin: 0;
   margin-bottom: 20px;
   border-bottom: 1px solid black;
 }
 
-.new-tweet textarea {
+.new_tweet textarea {
   width: 100%;
   padding: 5px 5px;
 }
 
-.new-tweet .counter {
+/*chars counting each types*/
+.new_tweet .counter {
   float: right;
   padding: 5px;
   font-style: italic;
