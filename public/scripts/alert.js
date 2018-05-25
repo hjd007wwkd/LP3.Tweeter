@@ -46,6 +46,9 @@ export default function(text) {
   } else if (text === "11") {
     $(".alert").text("You successfully deleted the post!");
     addOrRemoveClass("success");
+  } else if (text === "11") {
+    $(".alert").text("We don't need empty input!!");
+    addOrRemoveClass("fail");
   }
 };
 

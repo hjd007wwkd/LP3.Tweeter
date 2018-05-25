@@ -5,13 +5,18 @@ const cookieSession = require('cookie-session');
 
 module.exports = function(db) {
   userRoutes.post("/register", function(req, res){
-    const password = bcrypt.hashSync(req.body.password, 10);
+    const password = req.body.password;
     const username = req.body.username;
     const name = req.body.name;
 
+    if(password.length === 0 || username.length === 0 || name.length === 0) {
+      //cannot be empty input
+      return res.send("12")
+    }
+
     const user = {
       username: username,
-      password: password,
+      password: bcrypt.hashSync(req.body.password, 10),
       name: name
     };
 
@@ -43,6 +48,11 @@ module.exports = function(db) {
   userRoutes.post("/login", function(req, res){
     const password = req.body.password;
     const username = req.body.username;
+
+    if(password.length === 0 || username.length === 0) {
+      //cannot be empty input
+      return res.send("12")
+    }
 
     db.collection("users").findOne({username: username}, function(err, data){
       if(err){

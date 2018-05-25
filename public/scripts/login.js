@@ -50,7 +50,7 @@ function backToNormal(text) {
   } else {
     $(".register_page").fadeOut();
     $(".overlay").css("display", "none");
-    $(".register_form .username, .register_form .password").val('');
+    $(".register_form .username, .register_form .password, .register_form .name_tweet").val('');
     $(".register_btn").removeClass("clickEffect");
     registerPage = false;
   }
