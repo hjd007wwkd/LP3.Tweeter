@@ -5,9 +5,9 @@ const cookieSession = require('cookie-session');
 
 module.exports = function(db) {
   userRoutes.post("/register", function(req, res){
-    const password = req.body.password;
-    const username = req.body.username;
-    const name = req.body.name;
+    const password = req.body.password.trim();
+    const username = req.body.username.trim();
+    const name = req.body.name.trim();
 
     if(password.length === 0 || username.length === 0 || name.length === 0) {
       //cannot be empty input
@@ -46,8 +46,8 @@ module.exports = function(db) {
   })
 
   userRoutes.post("/login", function(req, res){
-    const password = req.body.password;
-    const username = req.body.username;
+    const password = req.body.password.trim();
+    const username = req.body.username.trim();
 
     if(password.length === 0 || username.length === 0) {
       //cannot be empty input
