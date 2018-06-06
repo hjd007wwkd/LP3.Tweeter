@@ -86,7 +86,7 @@ $(document).ready(function(){
     const data = $(this).serialize();
 
     $.post("/register", data)
-    .success(function(data){
+    .done(function(data){
       //show each message on different situation
       alertMessage(data[0]);
       //let user login right away
@@ -107,7 +107,7 @@ $(document).ready(function(){
     const data = $(this).serialize();
 
     $.post("/login", data)
-    .success(function(data){
+    .done(function(data){
       //show each message on different situation
       alertMessage(data[0]);
       //user now login
@@ -124,7 +124,7 @@ $(document).ready(function(){
   //logout
   $( ".logout_btn" ).on("click", function(){
     $.post("/logout")
-    .success(function(data){
+    .done(function(data){
       //successfully log out message
       alertMessage(data);
       logout();
